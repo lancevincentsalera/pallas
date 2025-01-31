@@ -106,11 +106,6 @@ where
         match self.recv_message().await? {
             Message::Accept(v, m) => {
                 self.0 = State::Done;
-                debug!("handshake accepted");
-                // log v and m
-                println!("handshake accepted");
-                println!("v: {:?}", v);
-                println!("m: {:?}", m);
                 Ok(Confirmation::Accepted(v, m))
             }
             Message::Refuse(r) => {
@@ -120,8 +115,8 @@ where
                 Ok(Confirmation::Rejected(r))
             }
             Message::QueryReply(version_table) => {
-                debug!("handshake query reply");
-
+                println!("Queried Version Table: {:?}", version_table);
+                
                 Ok(Confirmation::QueryReply(version_table))
             }
             _ => Err(Error::InvalidInbound),

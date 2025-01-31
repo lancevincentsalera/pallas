@@ -17,17 +17,17 @@ const PEER_SHARING_ENABLED: u8 = 1;
 
 impl VersionTable {
     #[deprecated(note = "no longer supported by spec")]
-    pub fn v4_and_above(network_magic: u64, peer_sharing: bool) -> VersionTable {
+    pub fn v4_and_above(network_magic: u64, query: bool) -> VersionTable {
         // Older versions are not supported anymore (removed from network-spec.pdf).
         // Try not to break compatibility with older pallas users.
-        Self::v7_and_above(network_magic, peer_sharing)
+        Self::v7_and_above(network_magic, query)
     }
 
     #[deprecated(note = "no longer supported by spec")]
-    pub fn v6_and_above(network_magic: u64, peer_sharing: bool) -> VersionTable {
+    pub fn v6_and_above(network_magic: u64, query: bool) -> VersionTable {
         // Older versions are not supported anymore (removed from network-spec.pdf).
         // Try not to break compatibility with older pallas users.
-        Self::v7_and_above(network_magic, peer_sharing)
+        Self::v7_and_above(network_magic, query)
     }
 
     pub fn v7_to_v10(network_magic: u64) -> VersionTable {
@@ -55,7 +55,7 @@ impl VersionTable {
         VersionTable { values }
     }
 
-    pub fn v7_and_above(network_magic: u64, peer_sharing: bool) -> VersionTable {
+    pub fn v7_and_above(network_magic: u64, query: bool) -> VersionTable {
         let values = vec![
             (
                 PROTOCOL_V7,
@@ -78,11 +78,8 @@ impl VersionTable {
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
             (
@@ -90,11 +87,8 @@ impl VersionTable {
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
             (
@@ -102,11 +96,8 @@ impl VersionTable {
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
         ]
@@ -116,18 +107,15 @@ impl VersionTable {
         VersionTable { values }
     }
 
-    pub fn v11_and_above(network_magic: u64, peer_sharing: bool) -> VersionTable {
+    pub fn v11_and_above(network_magic: u64, query: bool) -> VersionTable {
         let values = vec![
             (
                 PROTOCOL_V11,
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
             (
@@ -135,11 +123,8 @@ impl VersionTable {
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
             (
@@ -147,11 +132,8 @@ impl VersionTable {
                 VersionData::new(
                     network_magic,
                     true,
-                    match peer_sharing {
-                        true => Some(PEER_SHARING_ENABLED),
-                        false => Some(PEER_SHARING_DISABLED),
-                    },
-                    Some(false),
+                    Some(PEER_SHARING_DISABLED),
+                    Some(query),
                 ),
             ),
         ]

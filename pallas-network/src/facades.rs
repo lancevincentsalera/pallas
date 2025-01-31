@@ -116,7 +116,7 @@ impl PeerClient {
         Self::connect_with_peersharing(addr, magic, false).await
     }
 
-    pub async fn connect_with_peersharing(addr: impl ToSocketAddrs, magic: u64, peer_sharing: bool) -> Result<Self, Error> {
+    pub async fn connect_with_peersharing(addr: impl ToSocketAddrs, magic: u64, query: bool) -> Result<Self, Error> {
         let bearer = Bearer::connect_tcp(addr)
             .await
             .map_err(Error::ConnectFailure)?;
@@ -136,7 +136,7 @@ impl PeerClient {
 
         let plexer = plexer.spawn();
 
-        let versions = handshake::n2n::VersionTable::v7_and_above(magic, peer_sharing);
+        let versions = handshake::n2n::VersionTable::v7_and_above(magic, query);
         let versions_cbor = minicbor::to_vec(&versions).unwrap();
         println!("versions_cbor: {:?}", hex::encode(versions_cbor));
         println!("handshaking with versions: {:?}", versions);
@@ -164,10 +164,22 @@ impl PeerClient {
             txsubmission: txsubmission::Client::new(txsub_channel),
             peersharing: peersharing::Client::new(peersharing_channel),
             is_peer_sharing: match handshake {
-                Confirmation::Accepted(_, data) => {
-                    // log data.peer_sharing
-                    println!("data.peer_sharing: {:?}", data.peer_sharing);
-                    data.peer_sharing.unwrap_or(0) != 0
+                Confirmation::QueryReply(data) => {
+                    // This is a temporary solution to get the peer sharing status
+                    // Both versions 13 and 14 have the same peer sharing status
+                    // 13 and 14 is the only version that will always be returned
+                    // according to network spec
+                    let version_data = data.values.iter()
+                        .max_by_key(|(version, _)| *version)
+                        .map(|(_, data)| data);
+                        
+                    if let Some(data) = version_data {
+                        println!("Peer Sharing: {:?}", data.peer_sharing);
+                        println!("Query: {:?}", data.query);
+                        data.peer_sharing.unwrap_or(0) != 0
+                    } else {
+                        false
+                    }
                 }
                 _ => false,
             },
@@ -252,7 +264,7 @@ impl PeerServer {
         }
     }
 
-    pub async fn accept(listener: &TcpListener, magic: u64, peer_sharing: bool) -> Result<Self, Error> {
+    pub async fn accept(listener: &TcpListener, magic: u64, query: bool) -> Result<Self, Error> {
         let (bearer, address) = Bearer::accept_tcp(listener)
             .await
             .map_err(Error::ConnectFailure)?;
@@ -261,7 +273,7 @@ impl PeerServer {
 
         let accepted_version = client
             .handshake()
-            .handshake(n2n::VersionTable::v7_and_above(magic, peer_sharing))
+            .handshake(n2n::VersionTable::v7_and_above(magic, query))
             .await
             .map_err(Error::HandshakeProtocol)?;
 
